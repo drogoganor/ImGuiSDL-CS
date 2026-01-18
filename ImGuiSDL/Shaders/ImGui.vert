@@ -18,4 +18,5 @@ void main()
     fsin_texCoord = TexCoord;
     fsin_color = Color;
     fsin_position = Matrix * vec4(Position, 0.0, 1.0);
+    gl_Position = fsin_position;
 }

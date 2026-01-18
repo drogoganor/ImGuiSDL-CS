@@ -15,7 +15,7 @@ public unsafe class ImGuiRenderer : IDisposable
     /// <summary>
     /// Custom ImGui User-Callback
     /// </summary>
-    public delegate void UserCallback(ImDrawListPtr parentList, ImDrawCmdPtr cmd); 
+    public delegate void UserCallback(ImDrawListPtr parentList, ImDrawCmdPtr cmd);
 
     /// <summary>
     /// SDL GPU Device
@@ -84,12 +84,6 @@ public unsafe class ImGuiRenderer : IDisposable
             SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_MSL => "msl",
             _ => throw new NotImplementedException($"Unimplemented Shader Format '{shaderFormat}'")
         };
-
-        var error = SDL_GetError();
-        if (!string.IsNullOrWhiteSpace(error))
-        {
-            throw new Exception($"Error creating GPU pipeline: {error}");
-        }
 
         // create Vertex and Fragment shaders
         // Shaders are stored as Embedded files (see ImGuiSDL.csproj)
@@ -172,22 +166,22 @@ public unsafe class ImGuiRenderer : IDisposable
             };
 
             var vertexAttr = stackalloc SDL_GPUVertexAttribute[3] {
-                // Position : float2
-                new() { 
-                    format = SDL_GPUVertexElementFormat.SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, 
-                    location = 0, 
+				// Position : float2
+				new() {
+                    format = SDL_GPUVertexElementFormat.SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
+                    location = 0,
                     offset = 0
                 },
-                // TexCoord : float2
-                new() { 
-                    format = SDL_GPUVertexElementFormat.SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, 
-                    location = 1, 
+				// TexCoord : float2
+				new() {
+                    format = SDL_GPUVertexElementFormat.SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
+                    location = 1,
                     offset = sizeof(float) * 2
                 },
-                // Color: uint (ubyte4)
-                new() { 
-                    format = SDL_GPUVertexElementFormat.SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM, 
-                    location = 2, 
+				// Color: uint (ubyte4)
+				new() {
+                    format = SDL_GPUVertexElementFormat.SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM,
+                    location = 2,
                     offset = sizeof(float) * 4
                 }
             };
@@ -207,7 +201,7 @@ public unsafe class ImGuiRenderer : IDisposable
                 rasterizer_state = new()
                 {
                     cull_mode = SDL_GPUCullMode.SDL_GPU_CULLMODE_NONE,
-                }, 
+                },
                 multisample_state = new(),
                 depth_stencil_state = new(),
                 target_info = new()
@@ -216,12 +210,6 @@ public unsafe class ImGuiRenderer : IDisposable
                     color_target_descriptions = colorTargetDesc
                 }
             });
-
-            error = SDL_GetError();
-            if (!string.IsNullOrWhiteSpace(error))
-            {
-                throw new Exception($"Error creating GPU pipeline: {error}");
-            }
         }
 
         // create buffers
@@ -232,7 +220,8 @@ public unsafe class ImGuiRenderer : IDisposable
 
         // create sampler
         {
-            sampler = SDL_CreateGPUSampler(Device, new() {
+            sampler = SDL_CreateGPUSampler(Device, new()
+            {
                 min_filter = SDL_GPUFilter.SDL_GPU_FILTER_NEAREST,
                 mag_filter = SDL_GPUFilter.SDL_GPU_FILTER_NEAREST,
                 mipmap_mode = SDL_GPUSamplerMipmapMode.SDL_GPU_SAMPLERMIPMAPMODE_NEAREST,
@@ -263,7 +252,8 @@ public unsafe class ImGuiRenderer : IDisposable
                 throw new Exception($"{nameof(SDL_CreateGPUTexture)} Failed: {SDL_GetError()}");
 
             // upload texture data
-            var transferBuffer = SDL_CreateGPUTransferBuffer(Device, new() {
+            var transferBuffer = SDL_CreateGPUTransferBuffer(Device, new()
+            {
                 usage = SDL_GPUTransferBufferUsage.SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
                 size = (uint)size
             });
@@ -276,11 +266,13 @@ public unsafe class ImGuiRenderer : IDisposable
             var pass = SDL_BeginGPUCopyPass(cmd);
 
             SDL_UploadToGPUTexture(pass,
-                source: new() {
+                source: new()
+                {
                     transfer_buffer = transferBuffer,
                     offset = 0,
                 },
-                destination: new() {
+                destination: new()
+                {
                     texture = fontTexture,
                     w = (uint)width,
                     h = (uint)height,
@@ -379,7 +371,7 @@ public unsafe class ImGuiRenderer : IDisposable
             // calculate total size
             var vertexCount = 0;
             var indexCount = 0;
-            for (int i = 0; i < data.CmdListsCount; i ++)
+            for (int i = 0; i < data.CmdListsCount; i++)
             {
                 vertexCount += data.CmdLists[i].VtxBuffer.Size;
                 indexCount += data.CmdLists[i].IdxBuffer.Size;
@@ -393,7 +385,7 @@ public unsafe class ImGuiRenderer : IDisposable
 
             // copy data to arrays
             vertexCount = indexCount = 0;
-            for (int i = 0; i < data.CmdListsCount; i ++)
+            for (int i = 0; i < data.CmdListsCount; i++)
             {
                 var list = data.CmdLists[i];
                 var vertexSrc = new Span<ImDrawVert>((void*)list.VtxBuffer.Data, list.VtxBuffer.Size);
@@ -424,7 +416,7 @@ public unsafe class ImGuiRenderer : IDisposable
             };
 
             scoped ref var depthTarget = ref Unsafe.NullRef<SDL_GPUDepthStencilTargetInfo>();
-            var pass = SDL_BeginGPURenderPass(cmd, [ colorTargetInfo ], 1, depthTarget);
+            var pass = SDL_BeginGPURenderPass(cmd, [colorTargetInfo], 1, depthTarget);
 
             // bind pipeline
             SDL_BindGPUGraphicsPipeline(pass, pipeline);
@@ -448,7 +440,7 @@ public unsafe class ImGuiRenderer : IDisposable
             // draw commands
             var globalVtxOffset = 0;
             var globalIdxOffset = 0;
-            for (int i = 0; i < data.CmdListsCount; i ++)
+            for (int i = 0; i < data.CmdListsCount; i++)
             {
                 var imList = data.CmdLists[i];
                 var imCommands = (ImDrawCmd*)imList.CmdBuffer.Data;
@@ -466,7 +458,7 @@ public unsafe class ImGuiRenderer : IDisposable
                     if (imCmd->TextureId != texture)
                     {
                         texture = imCmd->TextureId;
-                        SDL_BindGPUFragmentSamplers(pass, 0, [new() { sampler = sampler, texture = fontTexture }], 1);
+                        SDL_BindGPUFragmentSamplers(pass, 0, [new() { sampler = sampler, texture = texture }], 1);
                     }
 
                     SDL_SetGPUScissor(pass, new()
