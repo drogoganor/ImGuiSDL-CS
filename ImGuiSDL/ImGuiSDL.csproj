@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
     <ProjectReference Include="..\SDL3-CS\SDL3\SDL3.Core.csproj" />
   </ItemGroup>
 

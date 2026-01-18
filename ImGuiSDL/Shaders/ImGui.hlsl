@@ -31,5 +31,5 @@ VsOutput vertex_main(VsInput input)
 
 float4 fragment_main(VsOutput input) : SV_Target0
 {
-	return Texture.Sample(Sampler, input.TexCoord) * input.Color;
+    return Texture.Sample(Sampler, input.TexCoord) * input.Color;
 }
